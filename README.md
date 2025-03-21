@@ -4,13 +4,6 @@ Welcome to the Dragons of Mugloar! This is a text-based
 adventure game built using Node.js. You can create your
 dragon and embark on exciting quests.
 
-## Table of Contents
-
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Running Tests](#running-tests)
-
 ## Features 🌟
 
 - Script asks for your dragons name.
