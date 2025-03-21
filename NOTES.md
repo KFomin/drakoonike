@@ -53,6 +53,7 @@ After 100+ runs of the program, I discovered the following:
 
 🚀 It makes sense to buy several items in a row if there is extra gold; this further reduces the gap between level and turn, increases the chances of completing tasks, and allows us to score more points.
 
-⭐ The most important discovery is that with my algorithm, there is a chance to make the character's level higher than the difficulty level. In this case, we stop losing missions, the level starts to increase even faster, and we enter an endless cycle of completing tasks. (I checked, and I got up to 100,000 turns with a score of more than 200,000,000.) This doesn't happen often, but it does happen. It seems like the rankings on the site don’t make sense, since we can get infinite points.
+⭐ The most important discovery is that with my algorithm, there is a chance to make the character's level higher than the difficulty level. In this case, we stop losing missions, the level starts to increase even faster, and we enter an endless cycle of completing tasks. (I checked, and I got up to 100,000 turns with a score of more than 30,000,000+.) This doesn't happen often, but it does happen. It seems like the rankings on the site don’t make sense, since we can get infinite points.
+![image](https://github.com/user-attachments/assets/3460c1e1-deb5-4209-aba1-5e89ec143894)
 
 🛑 To prevent an infinite loop, I added a check every 1000 turns that asks whether we want to continue. Thus, a very successful dragon, if desired, can live to retirement! 👴
