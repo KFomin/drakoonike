@@ -12,6 +12,10 @@ dragon and embark on exciting quests.
 - Decodes messages with ROT13 and Base64 encodings.
 - Enjoy a simple command-line interface.
 
+## Developer Notes
+
+For additional notes, please check [NOTES.md](./NOTES.md).
+
 ## Installation 📥
 
 Follow these steps to get the project up and running:
