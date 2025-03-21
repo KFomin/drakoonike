@@ -57,3 +57,6 @@ After 100+ runs of the program, I discovered the following:
 ![image](https://github.com/user-attachments/assets/3460c1e1-deb5-4209-aba1-5e89ec143894)
 
 🛑 To prevent an infinite loop, I added a check every 1000 turns that asks whether we want to continue. Thus, a very successful dragon, if desired, can live to retirement! 👴
+
+![image](https://github.com/user-attachments/assets/dad4f6da-55e1-434a-b0a0-a6fbafe21682)
+
