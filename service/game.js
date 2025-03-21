@@ -36,26 +36,33 @@ export class Game {
         while (this.lives > 0) {
             if (this.currentTurn % 1000 === 0 && this.currentTurn > 999) {
                 const continue_ = await askToContinue(this.userInput);
-                if (continue_ && (continue_ === true)) break;
+                if (!continue_) break;
             }
+
+            const shopJson = await this.api.getShopItems(this.gameId);
+
+            if (this.checkGameOver(shopJson)) {
+                break;
+            }
+
+            const items = this.shop.parseShopItems(JSON.stringify(shopJson));
+
 
             try {
                 if (this.buysInRow < 20) {
-                    await this.buyAnItem();
+                    await this.buyAnItem(items);
                     if (this.gold > 350) continue;
                 }
                 this.buysInRow = 0;
 
                 const questsJson = await this.api.getTheQuestBoard(this.gameId);
-                if (this.checkGameOver(questsJson)) break;
 
                 const quests = this.quest.parseQuests(JSON.stringify(questsJson));
                 const questToComplete = this.quest.getOptimalQuest(quests);
                 try {
                     const solveJson = await this.api.postSolveQuest(this.gameId, questToComplete.adId).then(res => JSON.stringify(res));
-                    if (this.checkGameOver(solveJson)) break;
-
                     const solveResponse = JSON.parse(solveJson);
+
                     this.lives = solveResponse.lives;
                     this.score = solveResponse.score;
                     this.gold = solveResponse.gold;
@@ -81,14 +88,10 @@ export class Game {
     }
 
 
-    async buyAnItem() {
-        const shopJson = await this.api.getShopItems(this.gameId);
-        if (this.checkGameOver(shopJson)) {
-            endGameMessage(this.score, this.gold);
-            return;
-        }
-
-        const items = this.shop.parseShopItems(JSON.stringify(shopJson));
+    async buyAnItem(items) {
+        // if no suggestions yet,
+        // then we suggest 2nd item,
+        // because 1st is healing potion
         this.lastItemSuggestion = this.lastItemSuggestion ?? items[1];
 
         for (let item of items) {

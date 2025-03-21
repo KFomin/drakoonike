@@ -1,7 +1,7 @@
 /**
  * Prompts the user to enter the name of their dragon.
  *
- * @param {readline.Interface} userInput - The readline interface for capturing user input.
+ * @param {Interface} userInput - The readline interface for capturing user input.
  * @returns {Promise<string>} A promise that resolves to the name of the dragon entered by the user.
  */
 export const askDragonName = (userInput) => {
