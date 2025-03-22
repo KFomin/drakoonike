@@ -14,12 +14,11 @@ export class Game {
         this.shop = new Shop();
         this.quest = new Quest();
         this.currentTurn = 0;
-        this.lastItemSuggestion = null;
+        this.lastItemSuggestion = '';
         this.name = '';
         this.buysInRow = 0;
         this.userInput = userInput;
     }
-
 
     async start(gameData, playerName) {
         this.gameId = gameData.gameId;
@@ -33,47 +32,24 @@ export class Game {
 
         console.log('Game has been started, good luck! ❤️');
 
+        const shopJson = await this.api.getShopItems(this.gameId);
+        const items = this.shop.parseShopItems(JSON.stringify(shopJson));
+
         while (this.lives > 0) {
             if (this.currentTurn % 1000 === 0 && this.currentTurn > 999) {
                 const continue_ = await askToContinue(this.userInput);
                 if (!continue_) break;
             }
 
-            const shopJson = await this.api.getShopItems(this.gameId);
-
-            if (this.checkGameOver(shopJson)) {
-                break;
-            }
-
-            const items = this.shop.parseShopItems(JSON.stringify(shopJson));
-
-
             try {
-                if (this.buysInRow < 20) {
-                    await this.buyAnItem(items);
+                if (this.buysInRow < 10) {
+                    await this.doTheShopTurn(items);
                     if (this.gold > 350) continue;
                 }
                 this.buysInRow = 0;
 
-                const questsJson = await this.api.getTheQuestBoard(this.gameId);
-
-                const quests = this.quest.parseQuests(JSON.stringify(questsJson));
-                const questToComplete = this.quest.getOptimalQuest(quests);
                 try {
-                    const solveJson = await this.api.postSolveQuest(this.gameId, questToComplete.adId).then(res => JSON.stringify(res));
-                    const solveResponse = JSON.parse(solveJson);
-
-                    this.lives = solveResponse.lives;
-                    this.score = solveResponse.score;
-                    this.gold = solveResponse.gold;
-                    this.currentTurn = solveResponse.turn;
-                    if (solveResponse.message.toLowerCase().includes("failed")) {
-                        console.log(`Turn ${this.currentTurn}: ${solveResponse.message} ${this.lives} lives left.`);
-                    } else {
-                        console.log(`Turn ${this.currentTurn}: ${solveResponse.message}`);
-                    }
-
-
+                    await this.doTheQuestTurn()
                 } catch (error) {
                     console.log("Error while trying to do the quest: " + error.message);
                     break;
@@ -84,77 +60,77 @@ export class Game {
                 break;
             }
         }
+
         endGameMessage(this.score, this.gold);
     }
 
+    async doTheQuestTurn() {
+        const questsJson = await this.api.getTheQuestBoard(this.gameId);
+        const quests = this.quest.parseQuests(JSON.stringify(questsJson));
+        const questToComplete = this.quest.getOptimalQuest(quests);
+        const solveJson = await this.api.postSolveQuest(this.gameId, questToComplete.adId).then(res => JSON.stringify(res));
+        const solveResponse = JSON.parse(solveJson);
 
-    async buyAnItem(items) {
-        // if no suggestions yet,
-        // then we suggest 2nd item,
-        // because 1st is healing potion
-        this.lastItemSuggestion = this.lastItemSuggestion ?? items[1];
+        this.lives = solveResponse.lives;
+        this.score = solveResponse.score;
+        this.gold = solveResponse.gold;
+        this.currentTurn = solveResponse.turn;
 
+        if (solveResponse.message.toLowerCase().includes("failed")) {
+            console.log(`Turn ${this.currentTurn}: ${solveResponse.message} ${this.lives} lives left.`);
+        } else {
+            console.log(`Turn ${this.currentTurn}: ${solveResponse.message}`);
+        }
+    }
+
+    async doTheShopTurn(items) {
         for (let item of items) {
             if (item.id === "hpot" && this.lives > 2) {
                 continue;
             }
 
             if (this.gold >= item.cost) {
-                let purchaseJson;
 
                 if (item.id === "hpot") {
-                    purchaseJson = await this.api.postItemBuy(this.gameId, item.id);
-                }
-
-                if (this.gold > 100 && this.currentTurn < 40 && item.id.includes(this.shop.suggestLowTierItem(this.lastItemSuggestion))) {
-                    purchaseJson = await this.api.postItemBuy(this.gameId, item.id);
-                    this.lastItemSuggestion = item;
-                }
-
-                if (this.gold > 300 && this.currentTurn > 39 && item.id.includes(this.shop.suggestHighTierItem(this.lastItemSuggestion))) {
-                    purchaseJson = await this.api.postItemBuy(this.gameId, item.id);
-                    this.lastItemSuggestion = item;
-                }
-
-                if (!purchaseJson) {
-                    continue;
-                }
-
-                if (this.checkGameOver(purchaseJson)) {
+                    let response = await this.api.postItemBuy(this.gameId, item.id);
+                    this.shoppingMessage(item.name, response);
                     break;
                 }
-                const purchaseResponse = JSON.parse(JSON.stringify(purchaseJson));
-                this.gold = purchaseResponse.gold;
-                this.currentTurn = purchaseResponse.turn;
-                this.lives = purchaseResponse.lives;
 
-                if (purchaseResponse.shoppingSuccess) {
-                    if (purchaseResponse.level > this.level) {
-                        this.level = purchaseResponse.level;
-                        this.buysInRow += 1;
-                        console.log(`Turn ${this.currentTurn}: ${this.name} got level ${this.level} with ${item.name}`);
-                    } else {
-                        console.log(`Turn ${this.currentTurn}: Successfully bought the ${item.name}`);
-                    }
-                } else {
-                    console.log(`Turn ${this.currentTurn}: Failed to buy ${item.name}`);
+                let equipId = this.suggestEquipToBuy(this.gold, this.currentTurn, this.lastItemSuggestion);
+
+                if (item.id === equipId) {
+                    let response = await this.api.postItemBuy(this.gameId, item.id);
+                    this.shoppingMessage(item.name, response);
+                    this.lastItemSuggestion = item.id;
+                    break;
                 }
-
-                break;
             }
         }
     }
 
-    checkGameOver(jsonResponse) {
-        if (typeof jsonResponse === 'string') {
-            return jsonResponse.toLowerCase().includes("game over");
+    suggestEquipToBuy(gold, currentTurn, lastItemSuggestion) {
+        if (gold < 300 && currentTurn < 40) {
+            return this.shop.suggestLowTierItem(lastItemSuggestion)
         }
-
-        if (jsonResponse && jsonResponse.status) {
-            return jsonResponse.status.toLowerCase() === "game over";
-        }
-
-        return false;
+        return this.shop.suggestHighTierItem(lastItemSuggestion)
     }
 
+    shoppingMessage(itemName, shoppingData) {
+        this.gold = shoppingData.gold;
+        this.currentTurn = shoppingData.turn;
+        this.lives = shoppingData.lives;
+
+        if (shoppingData.shoppingSuccess) {
+            if (shoppingData.level > this.level) {
+                this.level = shoppingData.level;
+                this.buysInRow += 1;
+                console.log(`Turn ${this.currentTurn}: ${this.name} got level ${this.level} with ${itemName}`);
+            } else {
+                console.log(`Turn ${this.currentTurn}: Successfully bought the ${itemName}`);
+            }
+        } else {
+            console.log(`Turn ${this.currentTurn}: Failed to buy ${itemName}`);
+        }
+    }
 }

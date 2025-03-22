@@ -12,10 +12,10 @@ class Main {
      * Initializes the Main class with API and readline for user input.
      */
     constructor() {
-        this.api = new Api(); // Create API instance
+        this.api = new Api();
         this.userInput = readline.createInterface({
-            input: stdin,  // User input from standard input
-            output: stdout, // Output messages to standard output
+            input: stdin,
+            output: stdout,
         });
     }
 
@@ -23,36 +23,30 @@ class Main {
      * Starts the main game loop, asking for the dragon's name and managing gameplay.
      */
     async start() {
-        let wantToPlay = true; // Flag to continue playing
+        let wantToPlay = true;
         while (wantToPlay) {
-            const dragonName = await askDragonName(this.userInput); // Get dragon name
-            await this.playGame(dragonName); // Start the game
+            const dragonName = await askDragonName(this.userInput);
+            try {
+                const gameData = await this.api.postStartTheGame();
+
+                welcomeMessage();
+
+                const game = new Game(this.userInput);
+
+                // Here the game starts. :)
+                await game.start(gameData, dragonName);
+            } catch (error) {
+                console.log(`Failed to start the game! Error: ${error.message}`);
+            }
 
             if (wantToPlay) {
-                wantToPlay = await askToPlayAgain(this.userInput); // Ask to play again
+                wantToPlay = await askToPlayAgain(this.userInput);
             }
         }
-        console.log("Thank you for playing!"); // Thank the user when done
-    }
-
-    /**
-     * Plays a single game session.
-     *
-     * @param {string} dragonName - Name of the dragon chosen by the user.
-     */
-    async playGame(dragonName) {
-        try {
-            const gameData = await this.api.postStartTheGame(); // Start game via API
-            welcomeMessage(); // Show welcome message
-
-            const game = new Game(this.userInput); // Create a Game instance
-            await game.start(gameData, dragonName); // Start the game
-        } catch (error) {
-            console.log(`Failed to start the game! Error: ${error.message}`); // Handle errors
-        }
+        console.log("Thank you for playing!");
     }
 }
 
 // Create a Main instance and start it
 const main = new Main();
-main.start().then(() => process.exit(1)); // Exit after the game ends
+main.start().then(() => process.exit(1));

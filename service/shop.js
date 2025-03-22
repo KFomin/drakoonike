@@ -46,12 +46,12 @@ export class Shop {
     /**
      * Suggests the next low-tier item based on the provided current item ID.
      *
-     * @param {Object} item - The current item object that contains the ID.
+     * @param {string} itemId - The current item object that contains the ID.
      * @returns {string} The ID of the suggested low-tier item. Returns "cs"
      *                  if the current item's ID does not match any known items.
      */
-    suggestLowTierItem(item) {
-        switch (item.id) {
+    suggestLowTierItem(itemId) {
+        switch (itemId) {
             case "cs":
                 return "gas";
             case "gas":
@@ -64,15 +64,16 @@ export class Shop {
                 return "cs";
         }
     }
+
     /**
      * Suggests the next high-tier item based on the provided current item ID.
      *
-     * @param {Object} item - The current item object that contains the ID.
+     * @param {string} itemId - The current item object that contains the ID.
      * @returns {string} The ID of the suggested high-tier item. Returns "ch"
      *                  if the current item's ID does not match any known items.
      */
-    suggestHighTierItem(item) {
-        switch (item.id) {
+    suggestHighTierItem(itemId) {
+        switch (itemId) {
             case "ch":
                 return "rf";
             case "rf":
