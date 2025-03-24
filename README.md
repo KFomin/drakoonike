@@ -22,7 +22,7 @@ Follow these steps to get the project up and running:
 
 1. **Clone the repository**:
    ```
-   git clone https://github.com/*yourusername*/dragons-of-mugloar.git
+   git clone https://github.com/KFomin/drakoonike.git
    ```
    Replace *yourusername* with your actual GitHub username.
 
