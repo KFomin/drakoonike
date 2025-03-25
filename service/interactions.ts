@@ -1,12 +1,14 @@
+import * as readline from "node:readline"; // Импортируем модуль readline
+
 /**
  * Prompts the user to enter the name of their dragon.
  *
- * @param {Interface} userInput - The readline interface for capturing user input.
+ * @param {readline.Interface} userInput - The readline interface for capturing user input.
  * @returns {Promise<string>} A promise that resolves to the name of the dragon entered by the user.
  */
-export const askDragonName = (userInput) => {
+export const askDragonName = (userInput: readline.Interface): Promise<string> => {
     return new Promise((resolve) => {
-        userInput.question('Name your dragon, please: ', (answer) => {
+        userInput.question('Name your dragon, please: ', (answer: string) => {
             resolve(answer);
         });
     });
@@ -18,9 +20,9 @@ export const askDragonName = (userInput) => {
  * @param {readline.Interface} userInput - The readline interface for capturing user input.
  * @returns {Promise<boolean>} A promise that resolves to true if the user wants to play again, false otherwise.
  */
-export const askToPlayAgain = (userInput) => {
+export const askToPlayAgain = (userInput: readline.Interface): Promise<boolean> => {
     return new Promise((resolve) => {
-        userInput.question('Would you like to play again? (y/n): ', (answer) => {
+        userInput.question('Would you like to play again? (y/n): ', (answer: string) => {
             resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
         });
     });
@@ -32,9 +34,9 @@ export const askToPlayAgain = (userInput) => {
  * @param {readline.Interface} userInput - The readline interface for capturing user input.
  * @returns {Promise<boolean>} A promise that resolves to true if the user wants to continue, false otherwise.
  */
-export const askToContinue = (userInput) => {
+export const askToContinue = (userInput: readline.Interface): Promise<boolean> => {
     return new Promise((resolve) => {
-        userInput.question('You just became an unkillable demon king! Would you like to continue (y/n): ', (answer) => {
+        userInput.question('You just became an unkillable demon king! Would you like to continue (y/n): ', (answer: string) => {
             resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
         });
     });
@@ -43,7 +45,7 @@ export const askToContinue = (userInput) => {
 /**
  * Displays a welcome message for the player at the beginning of their journey.
  */
-export const welcomeMessage = () => {
+export const welcomeMessage = (): void => {
     console.log(`
             This is the very beginning of your journey!
             To become successful and famous, you will need to work a little.
@@ -59,8 +61,11 @@ export const welcomeMessage = () => {
 
 /**
  * Displays an end game message, including the player's journey as a dragon tamer.
+ *
+ * @param {number} score - The player's score.
+ * @param {number} gold - The amount of gold left.
  */
-export const endGameMessage = (score, gold) => {
+export const endGameMessage = (score: number, gold: number): void => {
     console.log(`
             Your journey as a dragon tamer has come to an end, a path of trials and victories, where legends blend.
             Though you fought battles and the sky burned with fire,

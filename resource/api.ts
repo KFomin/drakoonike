@@ -1,7 +1,9 @@
-import axios from "axios";
+import axios, {AxiosInstance} from "axios";
+import {GameData, QuestModel} from "../models/models";
 
 export class Api {
     static BASE_URL = 'https://dragonsofmugloar.com/api/v2';
+    private readonly client: AxiosInstance;
 
     constructor() {
         this.client = axios.create({
@@ -18,9 +20,9 @@ export class Api {
      * @param {string} endpoint The API endpoint to which the request will be sent.
      * @param {string} method The HTTP method to use (e.g., "GET" or "POST").
      * @param {object} [data] Optional data to send in the body for POST requests.
-     * @returns {Promise<string>} The response body returned by the API as a string.
+     * @returns {Promise<any>} The response body returned by the API.
      */
-    async makeApiCall(endpoint, method, data = {}) {
+    async makeApiCall(endpoint: string, method: 'GET' | 'POST', data: object = {}): Promise<any> {
         const options = {
             method,
             url: endpoint,
@@ -34,9 +36,9 @@ export class Api {
     /**
      * Initiates a new game session by sending a POST request to the API.
      *
-     * @returns {Promise<string>} The JSON response body from the API.
+     * @returns {Promise<any>} The JSON response body from the API.
      */
-    async postStartTheGame() {
+    async postStartTheGame(): Promise<GameData> {
         return this.makeApiCall('/game/start', 'POST');
     }
 
@@ -45,9 +47,9 @@ export class Api {
      *
      * @param {string} gameId The ID of the current game.
      * @param {string} id The ID of the item to purchase.
-     * @returns {Promise<string>} The response body returned by the API.
+     * @returns {Promise<any>} The response body returned by the API.
      */
-    async postItemBuy(gameId, id) {
+    async postItemBuy(gameId: string, id: string): Promise<any> {
         return this.makeApiCall(`/${gameId}/shop/buy/${id}`, 'POST');
     }
 
@@ -55,9 +57,9 @@ export class Api {
      * Attempts to get a list of available items from the shop based on game ID.
      *
      * @param {string} gameId The ID of the current game.
-     * @returns {Promise<string>} The response body returned by the API.
+     * @returns {Promise<any>} The response body returned by the API.
      */
-    async getShopItems(gameId) {
+    async getShopItems(gameId: string): Promise<any> {
         return this.makeApiCall(`/${gameId}/shop`, 'GET');
     }
 
@@ -65,9 +67,9 @@ export class Api {
      * Retrieves the task board (list of tasks).
      *
      * @param {string} gameId The ID of the current game session.
-     * @returns {Promise<string>} The JSON response body from the API.
+     * @returns {Promise<any>} The JSON response body from the API.
      */
-    async getTheQuestBoard(gameId) {
+    async getTheQuestBoard(gameId: string): Promise<QuestModel[]> {
         return this.makeApiCall(`/${gameId}/messages`, 'GET');
     }
 
@@ -76,9 +78,9 @@ export class Api {
      *
      * @param {string} gameId The ID of the current game session.
      * @param {string} taskId The ID of the task to be solved.
-     * @returns {Promise<string>} The JSON response body from the API.
+     * @returns {Promise<any>} The JSON response body from the API.
      */
-    async postSolveQuest(gameId, taskId) {
+    async postSolveQuest(gameId: string, taskId: string): Promise<any> {
         return this.makeApiCall(`/${gameId}/solve/${taskId}`, 'POST');
     }
 
@@ -87,9 +89,9 @@ export class Api {
      * NOT USED NOW, used it few times to understand how some quests affects reputation.
      *
      * @param {string} gameId The ID of the current game session.
-     * @returns {Promise<string>} The JSON response body from the API.
+     * @returns {Promise<any>} The JSON response body from the API.
      */
-    async postInvestigateReputation(gameId) {
+    async postInvestigateReputation(gameId: string): Promise<any> {
         return this.makeApiCall(`/${gameId}/investigate/reputation`, 'POST');
     }
 }
