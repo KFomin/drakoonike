@@ -29,7 +29,7 @@ Follow these steps to get the project up and running:
 Navigate into the project directory:
 
 ```
-cd dragons-of-mugloar
+cd drakoonike
 ```
 
 Install the dependencies:
